@@ -38,7 +38,7 @@ def handler(event, context):
             "body": f"Error checking website: {str(e)}"
         }
 
-
+---
 🏗️ CDK Stack (hello_lambda_stack.py)
 from aws_cdk import (
     Stack,
