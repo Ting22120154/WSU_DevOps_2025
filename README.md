@@ -1,26 +1,18 @@
-# Lambda Canary Monitoring using AWS CDK
+# 🛠️ Lambda Canary Monitoring using AWS CDK
 
-This project demonstrates how to create a simple AWS Lambda-based canary using AWS CDK (Cloud Development Kit) in Python. The canary periodically sends an HTTP request to a specified URL (e.g., https://www.bbc.com/) to check its availability and performance. The infrastructure is fully defined using AWS CDK.
+This project demonstrates how to create a simple AWS Lambda-based **canary** using AWS CDK (Cloud Development Kit) in Python. The canary periodically sends an HTTP request to a specified URL (e.g., https://www.bbc.com/) to monitor its availability and performance.
 
-## 🔧 Project Structure
-WSU_DevOps_2025/
-├── lambda/
-│ └── lambda_function.py # The Lambda function that acts as a canary
-├── hello_lambda/
-│ └── hello_lambda_stack.py # CDK stack definition
-├── app.py # CDK entry point
-├── requirements.txt # Python dependencies
-├── README.md # Project documentation
-└── cdk.json # CDK config
-
+---
 
 ## 🚀 How It Works
 
-- The Lambda function makes an HTTP GET request to `https://www.bbc.com/`.
-- It checks for a successful response (status code 200).
-- Logs success or failure to Amazon CloudWatch.
+- The Lambda function sends a GET request to **https://www.bbc.com/**.
+- It checks for a successful HTTP 200 response.
+- Logs the result to **Amazon CloudWatch**.
 
-## 🖥️ Lambda Function (`lambda_function.py`)
+---
+
+## 🧠 Lambda Code (lambda_function.py)
 
 ```python
 import urllib3
@@ -45,8 +37,9 @@ def handler(event, context):
             "statusCode": 500,
             "body": f"Error checking website: {str(e)}"
         }
-🏗️ CDK Stack (hello_lambda_stack.py)
 
+
+🏗️ CDK Stack (hello_lambda_stack.py)
 from aws_cdk import (
     Stack,
     aws_lambda as _lambda,
@@ -66,18 +59,3 @@ class HelloLambdaStack(Stack):
         )
 
         CfnOutput(self, "LambdaFunctionName", value=hello_function.function_name)
-
-
-📦 Deployment Steps
-Install dependencies
-
-
-pip install -r requirements.txt
-Bootstrap your environment (if not already)
-
-cdk bootstrap
-Deploy the stack
-
-cdk deploy
-Test the Lambda Function in the AWS Console
-
