@@ -2,43 +2,71 @@
 # WSU_DevOps_2025 - Lambda Canary Monitoring Project
 
 ## 📌 Overview
-This project is developed for the DevOps 2025 course. It demonstrates the use of **AWS CDK** to deploy a **Lambda function as a canary** that monitors the availability of an external website ([https://www.bbc.com](https://www.bbc.com)).
+This project is part of the **DevOps 2025** coursework.  
+It demonstrates how to use **AWS CDK** to deploy a Python-based **Lambda function** that monitors the health and performance of an external website (https://www.bbc.com).
+
+---
 
 ## 🚀 Objective
-To simulate a canary deployment by:
-- Using AWS Lambda to monitor a web resource
-- Measuring availability and performance
-- Practicing Infrastructure as Code (IaC) using AWS CDK
+- ✅ Monitor website availability using AWS Lambda
+- ⏱️ Measure response latency (in seconds)
+- 📦 Report response size (in bytes)
+- 📄 Return structured JSON results
+- ☁️ Practice Infrastructure as Code (IaC) with AWS CDK
 
-## 🛠️ Technologies Used
-- AWS CDK (Python)
+---
+
+## 🧰 Technologies Used
 - AWS Lambda
+- AWS CDK (Python)
 - IAM Roles
-- CloudFormation
-- Python 3.9
+- Python 3.12+
+- CloudFormation (via CDK)
+
+---
 
 ## 🧠 Functionality
-- A Python-based Lambda function is deployed using CDK.
-- The function checks the status of https://www.bbc.com.
-- The result is returned in a structured JSON response.
-- The function can be tested via the AWS Lambda Console.
+- Sends an HTTP GET request to `https://www.bbc.com`
+- If successful, it returns:
+  - HTTP status code (e.g., 200)
+  - Response time (latency)
+  - Response length (in bytes)
+- If the request fails, it returns an error message and elapsed time
 
-## 🧪 Testing
+---
 
-The Lambda function was manually tested using the AWS Console.  
-It sends an HTTP GET request to [https://www.bbc.com](https://www.bbc.com) and returns the result.
+## 🧪 Example Lambda Output
 
-### ✅ Successful Response Example:
+### ✅ Success Response:
 ```json
 {
   "statusCode": 200,
-  "body": "https://www.bbc.com is UP. Status code: 200"
+  "body": "✅ Website is reachable!\nURL: https://www.bbc.com/\nStatus Code: 200\nLatency: 0.42 seconds\nResponse Size: 178254 bytes"
 }
-If the site is down or unreachable, the function handles the error gracefully and returns:
-
-json
-
+❌ Failure Response:
 {
   "statusCode": 500,
-  "body": "Error: Unable to reach https://www.bbc.com"
+  "body": "❌ Failed to reach website.\nURL: https://www.bbc.com/\nTried for: 3.10 seconds"
 }
+
+🛠️ Deployment Steps
+bash
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Bootstrap your environment (once per AWS account)
+cdk bootstrap
+
+# Deploy the Lambda function
+cdk deploy
+📂 Project Structure
+graphql
+
+WSU_DevOps_2025/
+├── lambda/
+│   └── lambda_function.py       # The Lambda canary code
+├── hello_lambda_stack.py        # CDK Stack: defines the Lambda resource
+├── app.py                       # CDK application entry point
+├── requirements.txt             # Python dependencies
+└── README.md                    # Project documentation
