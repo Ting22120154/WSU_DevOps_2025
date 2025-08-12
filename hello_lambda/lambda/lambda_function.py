@@ -1,49 +1,73 @@
-import urllib.request  # Import the urllib.request module to send HTTP requests.
-import time  # Import the time module to measure how long the request takes.
+import urllib.request
+import time
+import boto3
+
+cloudwatch = boto3.client('cloudwatch')
 
 def handler(event, context):
     url = "https://www.bbc.com/"
-    start_time = time.time()  # Record the start time before sending the request.
+    start_time = time.time()
 
-    success = False  # Create a flag to mark if the connection is successful
+    status = 0
+    content_length = 0
+    success = False
 
     try:
-        # Send request to the website
-        response = urllib.request.urlopen(url)
-        success = True
-
-    except:
-        # If there is an error (like network issue), set success to False
-        success = False
-
-    # Calculate how long the request took (whether it succeeded or failed)
-    latency = time.time() - start_time
-
-    if success:
-        # Get status code and response content
+        # ✅ Add User-Agent header to avoid getting blocked
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        response = urllib.request.urlopen(req)
         status = response.getcode()
         content = response.read()
         content_length = len(content)
 
-        # Return success result
-        return {
-            "statusCode": 200,
-            "body": (
-                "✅ Website is reachable!\n"
-                "URL: " + url + "\n"
-                "Status Code: " + str(status) + "\n"
-                "Latency: " + str(round(latency, 2)) + " seconds\n"
-                "Response Size: " + str(content_length) + " bytes"
-            )
-        }
+        if status >= 200 and status < 300:
+            success = True
+            latency = time.time() - start_time
 
-    else:
-        # Return failure result
+            cloudwatch.put_metric_data(
+                Namespace='WebsiteMonitor',
+                MetricData=[
+                    {'MetricName': 'Latency', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': latency, 'Unit': 'Seconds'},
+                    {'MetricName': 'ResponseSize', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': content_length, 'Unit': 'Bytes'},
+                    {'MetricName': 'StatusCode', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': status, 'Unit': 'None'},
+                    {'MetricName': 'IsSuccess', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': 1, 'Unit': 'Count'}
+                ]
+            )
+
+            return {
+                "statusCode": 200,
+                "body": (
+                    "✅ Website is reachable!\n"
+                    f"URL: {url}\n"
+                    f"Status Code: {status}\n"
+                    f"Latency: {round(latency, 2)} seconds\n"
+                    f"Response Size: {content_length} bytes"
+                )
+            }
+
+        else:
+            latency = time.time() - start_time
+
+            cloudwatch.put_metric_data(
+                Namespace='WebsiteMonitor',
+                MetricData=[
+                    {'MetricName': 'Latency', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': latency, 'Unit': 'Seconds'},
+                    {'MetricName': 'ResponseSize', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': content_length, 'Unit': 'Bytes'},
+                    {'MetricName': 'StatusCode', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': status, 'Unit': 'None'},
+                    {'MetricName': 'IsSuccess', 'Dimensions': [{'Name': 'URL', 'Value': url}], 'Value': 0, 'Unit': 'Count'}
+                ]
+            )            
+            return {
+                "statusCode": 500,
+                "body": "❌ Website request returned non-2xx status."
+            }
+
+
+
+    except Exception as e:
+        print("Error:", str(e))
         return {
             "statusCode": 500,
-            "body": (
-                "❌ Failed to reach website.\n"
-                "URL: " + url + "\n"
-                "Tried for: " + str(round(latency, 2)) + " seconds"
-            )
+            "body": f"❌ Request failed: {str(e)}"
         }
+
