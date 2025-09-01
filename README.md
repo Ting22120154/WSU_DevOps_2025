@@ -58,6 +58,21 @@ To deploy this monitoring system in your AWS environment:
 
 ---
 
+##  Architecture Overview
+
+This AWS CDK stack provisions the following components:
+
+| Component           | Description                                                        |
+|---------------------|--------------------------------------------------------------------|
+| **Lambda Function** | Checks website avalibility, latency, and HTTP response codes       |
+| **EventBridge Rule**| Triggers the Lambda function every 5 minutes (schedule rule)       |
+| **CloudWatch**      | Collects custom metrics and displays dashboards                    |
+| **SNS Topic**       | Sends email alerts when alarms are triggered                       |
+| **CloudWatch Alarms** | Detects failures or high latency and triggers notifications      |
+| **CDK Outputs**     | Prints out the CloudWatch dashboard. The dashboard shows two graphs: latency (in seconds) and availability       |
+
+
+---
 ##  Lambda Function Overview
 
 This project uses an AWS Lambda function to check the health of websites.
@@ -92,6 +107,19 @@ These are visualized in the CloudWatch dashboard and used to trigger alarms.
 
 ---
 
+## SNS Integration
+
+This project uses **Amazon SNS (Simple Notification Service)** to send email alerts.
+
+- A CloudWatch Alarm is triggered when a website fails or has high latency.
+- The alarm sends a message to an SNS Topic.
+- That topic is subscribed to your email.
+- You receive the alert via email.
+
+SNS can also support other types of notifications (e.g. SMS, Lambda triggers, webhooks) if extended in the future.
+
+---
+
 ##  Email Alerts
 
 When an alarm is triggered (e.g. a website is down or slow), an email is sent via Amazon SNS.
@@ -101,5 +129,20 @@ When an alarm is triggered (e.g. a website is down or slow), an email is sent vi
 1. In `app.py`, update the `alarm_emails` list with your email address.
 2. Deploy the stack.
 3. Go to your inbox and confirm the subscription (check spam folder).
-4. Done!  You’ll now get alerts like:
 
+---
+
+##  Project Structure
+
+HELLO-LAMBDA/
+│
+├── hello_lambda/               # CDK application source
+│   ├
+│   ├── lambda/                 # Lambda function code
+│   │   ├── lambda_function.py  # Main logic to check websites
+│   │ 
+│   └── hello_lambda_stack.py   # CDK Stack definition (all infra defined here)
+│
+├── app.py                      # Entry point for CDK (calls HelloLambdaStack)
+├── cdk.json                    # CDK configuration
+├── README.md                   # Project documentation
