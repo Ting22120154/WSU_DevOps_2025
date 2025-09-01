@@ -1,11 +1,15 @@
 # Website Health Monitor
 This project uses **AWS Lambda + CloudWatch + EventBridge** to monitor website uptime and performance. It:
 
+---
+
 ## Features
 - Checks website every 5 minutes  
 - Publishes custom metrics to CloudWatch  
 - Dashboard auto-generated  
 - Sends email alerts via SNS
+
+---
 
 ## About me
 Hi! I'm TING. I am building a cloud-based website monitoring system using AWS Lambda and CloudWatch.
@@ -35,8 +39,8 @@ To deploy this monitoring system in your AWS environment:
 
 2. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
+   git clone https://github.com/Ting22120154/WSU_DevOps_2025.git
+   cd WSU_DevOps_2025
    ```
 
 3. **Bootstrap the CDK** (only once per AWS account/region):
