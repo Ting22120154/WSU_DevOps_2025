@@ -1,49 +1,101 @@
-# WSU_DevOps_2025 - Multi-Website Lambda Monitoring Project
+# Website Health Monitor
+This project uses **AWS Lambda + CloudWatch + EventBridge** to monitor website uptime and performance. It:
 
-## 📌 Overview
-This project is part of the **DevOps 2025** coursework at Western Sydney University.  
-It demonstrates how to use **AWS CDK** (Python) to deploy a scheduled Lambda function that automatically monitors the health and latency of multiple websites, with real-time dashboards and email alerts for failures.
+## Features
+- Checks website every 5 minutes  
+- Publishes custom metrics to CloudWatch  
+- Dashboard auto-generated  
+- Sends email alerts via SNS
+
+## About me
+Hi! I'm TING. I am building a cloud-based website monitoring system using AWS Lambda and CloudWatch.
+
+<details>
+<summary>Monitored Websites</summary>
+
+| Rank | Website              |
+|-----:|----------------------|
+|     1| https://www.bbc.com/ |
+|     2| https://cnn.com/     |
+|     3| https://news.com.au/ |
+
+</details>
 
 ---
 
-## 🚀 Features
+## Installation & Deployment
 
-- **Multi-site Monitoring:** Easily monitor any number of websites by editing a URL list.
-- **Serverless & Automated:** Uses AWS Lambda and EventBridge to check sites every 5 minutes (no server needed).
-- **CloudWatch Dashboards:** Automatically creates real-time graphs for latency and uptime of each website.
-- **CloudWatch Alarms:** Automatically sets up alarms for:
-  - **Availability:** Alerts if a site is down for 2 consecutive checks (10 minutes).
-  - **Latency:** Alerts if a site is slow (>1 second) for 3 consecutive checks (15 minutes).
-- **SNS Email Alerts:** Instantly notifies you via email when a problem is detected.
-- **Easy Customization:** Add/remove monitored sites and alert recipients in one file, redeploy to update.
+To deploy this monitoring system in your AWS environment:
+
+1. **Install prerequisites**:
+   - [Node.js](https://nodejs.org/)
+   - [AWS CLI](https://aws.amazon.com/cli/)
+   - [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+   - Python 3.12
+
+2. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/your-repo-name.git
+   cd your-repo-name
+   ```
+
+3. **Bootstrap the CDK** (only once per AWS account/region):
+   ```bash
+   cdk bootstrap
+   ```
+
+4. **Deploy the stack**:
+   ```bash
+   cdk deploy
+   ```
+
+5. **Confirm email subscription**:
+   - Check your inbox and **confirm** the SNS subscription request to receive alerts.
 
 ---
 
-## 🧰 Technologies Used
+##  Lambda Function Overview
 
-- AWS Lambda (Python 3.12+)
-- AWS CDK (Python)
-- AWS EventBridge (Scheduled jobs)
-- AWS CloudWatch (metrics, dashboards, alarms)
-- AWS SNS (notifications)
-- AWS IAM (permissions)
+This project uses an AWS Lambda function to check the health of websites.
 
+For each URL in the list, the Lambda:
 
-## 📂 Project Structure
-WSU_DevOps_2025/
-├── lambda/
-│ └── lambda_function.py # Lambda: website checking logic
-├── hello_lambda_stack.py # CDK Stack: defines Lambda, alarms, dashboard, SNS
-├── app.py # CDK entry point
-├── requirements.txt # Python dependencies
-└── README.md # This documentation
+1. Sends an HTTP request using Python's `urllib`.
+2. Measures:
+   - Response Latency (how long it takes)
+   - Response Size
+   - Success (1) or Failure (0)
+   - HTTP Status Code
+3. Sends these metrics to CloudWatch.
+4. Returns a human-readable report (used for alerts or debugging).
 
-📊 How It Works
+The function runs every 5 minutes, triggered by an EventBridge rule.
 
-Lambda runs on a schedule (every 5 min) and checks all URLs.
+---
 
-Results are sent to CloudWatch as custom metrics (IsSuccess, Latency) for each website.
+## Metrics Tracked
 
-CloudWatch Dashboard visualizes uptime and response time for all monitored websites.
+The Lambda function sends 4 key metrics to CloudWatch under the namespace `WebsiteMonitor`:
 
-CloudWatch Alarms detect failures or high latency and trigger SNS email alerts.
+| Metric Name    | Description                           | Unit     |
+|----------------|---------------------------------------|----------|
+| `Latency`      | How long the website took to respond  | Seconds  |
+| `IsSuccess`    | 1 if response is 2xx, else 0          | Count    |
+| `StatusCode`   | HTTP status code of the response      | None     |
+| `ResponseSize` | Size of the webpage content           | Bytes    |
+
+These are visualized in the CloudWatch dashboard and used to trigger alarms.
+
+---
+
+##  Email Alerts
+
+When an alarm is triggered (e.g. a website is down or slow), an email is sent via Amazon SNS.
+
+### How to receive email alerts:
+
+1. In `app.py`, update the `alarm_emails` list with your email address.
+2. Deploy the stack.
+3. Go to your inbox and confirm the subscription (check spam folder).
+4. Done!  You’ll now get alerts like:
+
