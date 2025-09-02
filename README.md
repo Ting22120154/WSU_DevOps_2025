@@ -129,11 +129,11 @@ When an alarm is triggered (e.g. a website is down or slow), an email is sent vi
 1. In `app.py`, update the `alarm_emails` list with your email address.
 2. Deploy the stack.
 3. Go to your inbox and confirm the subscription (check spam folder).
-
 ---
 
-##  Project Structure
+## Project Structure
 
+```text
 HELLO-LAMBDA/
 │
 ├── hello_lambda/               # CDK application source
