@@ -1,6 +1,6 @@
 # Website Health Monitor
-This project uses **AWS Lambda + CloudWatch + EventBridge** to monitor website uptime and performance. It:
-
+This project uses **AWS Lambda + CloudWatch + EventBridge** to monitor website uptime and performance,  
+with **SNS for alerts** and **DynamoDB for logging alarm events**.
 ---
 
 ## Features
@@ -8,6 +8,8 @@ This project uses **AWS Lambda + CloudWatch + EventBridge** to monitor website u
 - Publishes custom metrics to CloudWatch  
 - Dashboard auto-generated  
 - Sends email alerts via SNS
+- Logs all alarm events into DynamoDB for history tracking  
+- Alarm Logger Lambda automatically writes alarm transitions into the database 
 
 ---
 
@@ -56,6 +58,10 @@ To deploy this monitoring system in your AWS environment:
 5. **Confirm email subscription**:
    - Check your inbox and **confirm** the SNS subscription request to receive alerts.
 
+6. **Verify DynamoDB logging**:
+   - Go to **DynamoDB Console → Tables → WebHealthAlarmsTable → Explore items**  
+   - Trigger a test alarm (e.g., add a fake URL or publish a test message to SNS)  
+   - Confirm that a new alarm record appears in the table  
 ---
 
 ##  Architecture Overview
@@ -70,7 +76,8 @@ This AWS CDK stack provisions the following components:
 | **SNS Topic**       | Sends email alerts when alarms are triggered                       |
 | **CloudWatch Alarms** | Detects failures or high latency and triggers notifications      |
 | **CDK Outputs**     | Prints out the CloudWatch dashboard. The dashboard shows two graphs: latency (in seconds) and availability       |
-
+| **DynamoDB Table**  | Stores every CloudWatch alarm event with timestamped details       |
+| **Alarm Logger Lambda** | Subscribed to SNS; parses alarm messages and writes to DynamoDB |
 
 ---
 ##  Lambda Function Overview
@@ -89,6 +96,8 @@ For each URL in the list, the Lambda:
 4. Returns a human-readable report (used for alerts or debugging).
 
 The function runs every 5 minutes, triggered by an EventBridge rule.
+5. Logs alarm events into DynamoDB for historical tracking.  
+
 
 ---
 
@@ -138,9 +147,12 @@ HELLO-LAMBDA/
 │
 ├── hello_lambda/               # CDK application source
 │   ├
-│   ├── lambda/                 # Lambda function code
+│   ├── lambda/                 # Monitoring Lambda function code
 │   │   ├── lambda_function.py  # Main logic to check websites
-│   │ 
+│   │
+│   ├── alarm_logger/           # Alarm Logger Lambda function code
+│   │   ├── alarm_logger.py     # Handles SNS alarm messages and writes to DynamoDB
+│   │
 │   └── hello_lambda_stack.py   # CDK Stack definition (all infra defined here)
 │
 ├── app.py                      # Entry point for CDK (calls HelloLambdaStack)

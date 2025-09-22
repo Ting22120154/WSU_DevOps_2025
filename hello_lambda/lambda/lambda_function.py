@@ -74,7 +74,8 @@ def handler(event, context):
     urls = [
         "https://www.bbc.com/",
         "https://edition.cnn.com/",
-        "https://www.news.com.au/"
+        "https://www.news.com.au/",
+        "https://idontexist12345.com/" #wrong one
     ]
     results = []   # Store all website check results
     for url in urls:
