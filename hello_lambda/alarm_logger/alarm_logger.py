@@ -67,31 +67,7 @@ def _now_iso_utc() -> str:
 # Lambda entry point
 # -----------------------------------------------------------------------------
 def handler(event: Dict[str, Any], context) -> Dict[str, Any]:
-    """
-    Handle an SNS event (Records array). Each record contains one SNS message.
-    Expected SNS message body for CloudWatch Alarms is a JSON string like:
 
-    {
-      "AlarmName": "LatencyAlarm_example_com",
-      "AlarmDescription": "Website https://example.com latency > 1.0s!",
-      "AWSAccountId": "123456789012",
-      "NewStateValue": "ALARM",
-      "NewStateReason": "Threshold Crossed: ...",
-      "StateChangeTime": "2025-09-22T12:34:56.789+0000",
-      "Region": "APAC - Sydney",
-      "Trigger": {
-        "Namespace": "WebsiteMonitor",
-        "MetricName": "Latency",
-        "Dimensions": [{"name":"URL","value":"https://example.com"}],
-        "StatisticType": "Average",
-        "Period": 300,
-        "Threshold": 1.0,
-        ...
-      }
-    }
-
-    For robustness, we tolerate non-JSON messages by storing them under "RawMessage".
-    """
 
     # Defensive: event may not have Records if misconfigured
     records = event.get("Records", [])
